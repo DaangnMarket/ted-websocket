@@ -29,6 +29,17 @@ class ViewController: UIViewController, URLSessionWebSocketDelegate {
         return button
     }()
     
+    private let textField: UITextField = {
+       let textField = UITextField()
+        textField.backgroundColor = .white
+        textField.placeholder = "Type a message..."
+        textField.textColor = .black
+        textField.borderStyle = .roundedRect
+        
+        return textField
+    }()
+    
+    
     let tableView = UITableView()
     var messages: [String] = []
     
@@ -45,6 +56,12 @@ class ViewController: UIViewController, URLSessionWebSocketDelegate {
         let url = URL(string: "wss://s9309.blr1.piesocket.com/v3/1?api_key=cZGOksfuE6CqV1cZfly2CnFBqbE33D1UBzTWgUvd&notify_self=1")
         webSocket = session.webSocketTask(with: url!)
         webSocket?.resume()
+        
+        textField.frame = CGRect(x: 0, y: 0, width: 200, height: 30)
+        textField.center = CGPoint(x: view.center.x, y: closeButton.frame.maxY + textField.frame.height/2 + 100)
+        textField.translatesAutoresizingMaskIntoConstraints = false
+
+        view.addSubview(textField)
         
         closeButton.frame = CGRect(x: 0, y: 0, width: 200, height: 50)
         view.addSubview(closeButton)
@@ -88,7 +105,7 @@ class ViewController: UIViewController, URLSessionWebSocketDelegate {
     //
     @objc func send() {
 
-        let newMessage = "Send new message: \(Int.random(in: 10000...20000))"
+        guard let newMessage = textField.text, !newMessage.isEmpty else { return }
         self.messages.append(newMessage)
 
         self.webSocket?.send(.string(newMessage), completionHandler: { error in
