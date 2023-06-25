@@ -11,6 +11,24 @@ class ViewController: UIViewController, URLSessionWebSocketDelegate {
     
     private var webSocket: URLSessionWebSocketTask?
     
+    private let sendButton: UIButton = {
+        let Sbutton = UIButton()
+        Sbutton.backgroundColor = .white
+        Sbutton.setTitle("Send", for: .normal)
+        Sbutton.setTitleColor(.black, for: .normal)
+        
+        return Sbutton
+    }()
+    
+    private let closeButton: UIButton = {
+        let button = UIButton()
+        button.backgroundColor = .white
+        button.setTitle("Close", for: .normal)
+        button.setTitleColor(.black, for: .normal)
+        
+        return button
+    }()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -24,6 +42,18 @@ class ViewController: UIViewController, URLSessionWebSocketDelegate {
         let url = URL(string: "wss://s9309.blr1.piesocket.com/v3/1?api_key=cZGOksfuE6CqV1cZfly2CnFBqbE33D1UBzTWgUvd&notify_self=1")
         webSocket = session.webSocketTask(with: url!)
         webSocket?.resume()
+        
+        closeButton.frame = CGRect(x: 0, y: 0, width: 200, height: 50)
+        view.addSubview(closeButton)
+        closeButton.addTarget(self, action: #selector(close), for: .touchUpInside)
+        closeButton.center = view.center
+        
+        sendButton.frame = CGRect(x: 0, y: 0, width: 200, height: 50)
+        sendButton.addTarget(self, action: #selector(send), for: .touchUpInside)
+        view.addSubview(sendButton)
+        sendButton.translatesAutoresizingMaskIntoConstraints = false
+        sendButton.center = CGPoint(x: closeButton.center.x, y: closeButton.frame.maxY + sendButton.frame.height/2 + 10)
+
     }
     
     //ping을 통해 webSocket이 잘 연결되고 있는지 확인
@@ -36,12 +66,12 @@ class ViewController: UIViewController, URLSessionWebSocketDelegate {
     }
     
     //connection이 끝났을 때 대한 이유
-    func close() {
+    @objc func close() {
         webSocket?.cancel(with: .goingAway, reason: "Demo ended".data(using: .utf8))
     }
     
     //
-    func send() {
+    @objc func send() {
 
         DispatchQueue.global().asyncAfter(deadline: .now() + 1) {
             self.send()
@@ -79,7 +109,7 @@ class ViewController: UIViewController, URLSessionWebSocketDelegate {
         print("Did connect to socket")
         ping()
         receive()
-        send()
+//        send()
     }
     
     func urlSession(_ session: URLSession, webSocketTask: URLSessionWebSocketTask, didCloseWith closeCode: URLSessionWebSocketTask.CloseCode, reason: Data?) {
