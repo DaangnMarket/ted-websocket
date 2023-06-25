@@ -29,6 +29,9 @@ class ViewController: UIViewController, URLSessionWebSocketDelegate {
         return button
     }()
     
+    let tableView = UITableView()
+    var messages: [String] = []
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -53,6 +56,18 @@ class ViewController: UIViewController, URLSessionWebSocketDelegate {
         view.addSubview(sendButton)
         sendButton.translatesAutoresizingMaskIntoConstraints = false
         sendButton.center = CGPoint(x: closeButton.center.x, y: closeButton.frame.maxY + sendButton.frame.height/2 + 10)
+        
+        
+        
+        tableView.register(UITableViewCell.self, forCellReuseIdentifier: "CellIdentifier")
+        tableView.frame = CGRect(x: 0, y: sendButton.frame.maxY + 10, width: view.bounds.width, height: view.bounds.height - sendButton.frame.maxY - 10)
+        tableView.backgroundColor = .red
+        tableView.delegate = self
+        tableView.dataSource = self
+        // tableView의 설정 (예: delegate, dataSource, cell 등)
+        view.addSubview(tableView)
+        tableView.translatesAutoresizingMaskIntoConstraints = false
+
 
     }
     
@@ -73,14 +88,20 @@ class ViewController: UIViewController, URLSessionWebSocketDelegate {
     //
     @objc func send() {
 
-        DispatchQueue.global().asyncAfter(deadline: .now() + 1) {
-            self.send()
-            self.webSocket?.send(.string("Send new message: \(Int.random(in: 0...1000))"), completionHandler: { error in
-                if let error = error {
-                    print("send error: \(error)")
+        let newMessage = "Send new message: \(Int.random(in: 10000...20000))"
+        self.messages.append(newMessage)
+
+        self.webSocket?.send(.string(newMessage), completionHandler: { error in
+            if let error = error {
+                print("send error: \(error)")
+            } else {
+                DispatchQueue.main.async {
+                    self.tableView.reloadData()
+                    let indexPath = IndexPath(row: self.messages.count - 1, section: 0)
+                    self.tableView.scrollToRow(at: indexPath, at: .bottom, animated: true)
                 }
-            })
-        }
+            }
+        })
     }
     
     
@@ -118,3 +139,18 @@ class ViewController: UIViewController, URLSessionWebSocketDelegate {
     
 }
 
+
+extension ViewController: UITableViewDataSource, UITableViewDelegate {
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return messages.count
+    }
+    
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: "CellIdentifier", for: indexPath)
+        
+        let message = messages[indexPath.row]
+        cell.textLabel?.text = message
+        
+        return cell
+    }
+}
