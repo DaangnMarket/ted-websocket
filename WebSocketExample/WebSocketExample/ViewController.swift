@@ -53,7 +53,8 @@ class ViewController: UIViewController, URLSessionWebSocketDelegate {
             delegate: self,
             delegateQueue: OperationQueue()
         )
-        let url = URL(string: "wss://s9309.blr1.piesocket.com/v3/1?api_key=cZGOksfuE6CqV1cZfly2CnFBqbE33D1UBzTWgUvd&notify_self=1")
+//        let url = URL(string: "wss://s9309.blr1.piesocket.com/v3/1?api_key=cZGOksfuE6CqV1cZfly2CnFBqbE33D1UBzTWgUvd&notify_self=1")
+        let url = URL(string: "ws://localhost:1337/")
         webSocket = session.webSocketTask(with: url!)
         webSocket?.resume()
         
